@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Lisensi — Arraihan Academy</title>
+<style>
+body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f5f7f6;color:#1b2421}header{background:#0f5c4d;color:#fff;padding:12px 16px}
+main{max-width:1000px;margin:auto;padding:16px}.c{background:#fff;border:1px solid #d8e0dd;border-radius:12px;padding:16px;margin-bottom:16px}
+input{padding:9px;border:1px solid #d8e0dd;border-radius:8px;font:inherit;margin:0 6px 6px 0}button{background:#0f5c4d;color:#fff;border:0;padding:9px 14px;border-radius:8px;font-weight:600;cursor:pointer}
+button.x{background:#e8f3f0;color:#0f5c4d;padding:4px 10px;margin-right:4px}.w{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #d8e0dd;padding:6px;text-align:left;white-space:nowrap}
+code{background:#e8f3f0;padding:2px 6px;border-radius:4px}#m{color:#b91c1c}
+</style></head><body>
+<header><b>🔑 Admin Lisensi</b> — Arraihan Academy • WA 085832288819</header>
+<main>
+<div class="c"><h3>Masuk</h3><input id="ak" type="password" placeholder="Admin Key"><button onclick="load()">Masuk</button> <span id="m"></span></div>
+<div class="c" id="mk" hidden><h3>Buat Lisensi</h3>
+<input id="nm" placeholder="Nama pelanggan"><input id="dr" type="number" value="365" min="0" style="width:120px" title="0 = seumur hidup"><input id="jm" type="number" value="1" min="1" max="50" style="width:80px"><button onclick="mk()">Buat</button>
+<p style="font-size:12px;color:#6b7a75">Durasi dalam hari (0 = seumur hidup) dan jumlah kode. Kode terikat ke 1 perangkat saat diaktivasi.</p><div id="nk"></div></div>
+<div class="c" id="ls" hidden><h3>Daftar Lisensi</h3><div class="w"><table id="t"></table></div></div>
+</main>
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbxLpBMqE9fCx70o9OkNmjxdAY0H6jFw4v-IxPzDWtDTZ34HJB6ziPYepBVI_niu9DMV2w/exec';
+const $=s=>document.querySelector(s),E=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function api(a,d={}){d.adminKey=$('#ak').value;try{const r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,data:d})});return await r.json()}catch(e){return{success:false,message:e.message}}}
+async function load(){$('#m').textContent='';const r=await api('adminList');if(!r.success){$('#m').textContent=r.message;return}
+$('#mk').hidden=$('#ls').hidden=false;$('#t').innerHTML='<tr><th>Kode</th><th>Nama</th><th>Durasi</th><th>Status</th><th>Aktivasi</th><th>Berakhir</th><th>Aksi</th></tr>'+r.data.reverse().map(x=>`<tr><td><code>${E(x.key)}</code></td><td>${E(x.nama)}</td><td>${x.durasi||'∞'}</td><td>${E(x.status)}</td><td>${E((x.act||'').slice(0,10))}</td><td>${E((x.exp||'').slice(0,10))}</td><td><button class="x" onclick="op('adminReset','${E(x.key)}')">Reset</button><button class="x" onclick="op('adminRevoke','${E(x.key)}')">Cabut</button></td></tr>`).join('')}
+async function mk(){const r=await api('adminCreate',{nama:$('#nm').value,durasi:$('#dr').value,jumlah:$('#jm').value});if(!r.success)return alert(r.message);$('#nk').innerHTML='<b>Kode baru:</b><br>'+r.keys.map(k=>'<code>'+k+'</code>').join(' ');load()}
+async function op(a,k){if(!confirm(a+' '+k+'?'))return;const r=await api(a,{key:k});if(!r.success)alert(r.message);load()}
+</script></body></html>
